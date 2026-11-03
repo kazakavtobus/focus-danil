@@ -1,0 +1,50 @@
+name: Publish Windows release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-fund --no-audit
+      - name: Configure GitHub auto-update feed
+        run: node scripts/configure-github.mjs
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+      - name: Check version matches tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $v = node -p "require('./package.json').version"
+          if ("v$v" -ne "${{ github.ref_name }}") { throw "Tag must equal v$v" }
+      - name: Syntax and updater tests
+        run: |
+          npm run check
+          npm test
+      - name: Build Windows NSIS installer and update manifest
+        run: npm run build:win
+      - name: Publish downloadable installer for tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            release/*.exe
+            release/*.yml
+            release/*.blockmap
