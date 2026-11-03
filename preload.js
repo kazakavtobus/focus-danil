@@ -1,5 +1,10 @@
 const {contextBridge, ipcRenderer} = require('electron');
 contextBridge.exposeInMainWorld('focusDesktop', {
+  minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+  toggleMaximizeWindow: () => ipcRenderer.invoke('window:toggle-maximize'),
+  closeWindow: () => ipcRenderer.invoke('window:close'),
+  isWindowMaximized: () => ipcRenderer.invoke('window:is-maximized'),
+  onWindowState: callback => ipcRenderer.on('window:state', (_event,state) => callback(state)),
   load: () => ipcRenderer.invoke('state:load'),
   save: data => ipcRenderer.invoke('state:save',data),
   addPhoto: () => ipcRenderer.invoke('photos:add'),

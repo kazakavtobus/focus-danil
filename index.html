@@ -11,6 +11,21 @@
   <script src="app.js" defer></script>
 </head>
 <body>
+  <header class="window-chrome" aria-label="Панель окна FOCUS">
+    <div class="window-drag" title="Перетащить окно">
+      <span class="window-brand-mark" aria-hidden="true">F</span>
+      <span class="window-brand-name">FOCUS<span class="window-brand-point">.</span></span>
+      <span class="window-brand-separator" aria-hidden="true"></span>
+      <span class="window-brand-caption">STAY FOCUSED</span>
+      <span class="window-brand-spacer"></span>
+      <span class="window-brand-message">Твой темп. Твои правила.</span>
+    </div>
+    <div class="window-controls" aria-label="Управление окном">
+      <button type="button" class="window-control" data-action="window-minimize" title="Свернуть" aria-label="Свернуть окно"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+      <button type="button" class="window-control" data-action="window-maximize" title="Развернуть" aria-label="Развернуть окно"><svg class="window-icon-max" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg><svg class="window-icon-restore" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 8V5h10v10h-3"/><rect x="5" y="9" width="10" height="10" rx="1.5"/></svg></button>
+      <button type="button" class="window-control window-control-close" data-action="window-close" title="Скрыть в трей" aria-label="Скрыть в трей"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+  </header>
   <div class="aura aura-one"></div><div class="aura aura-two"></div><div class="graph-paper"></div>
   <div id="app"><div class="startup">Stay Focused<span>Загружаем твоё пространство...</span></div></div>
   <div id="toast" role="status" aria-live="polite"></div>

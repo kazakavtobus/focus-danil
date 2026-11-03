@@ -67,14 +67,17 @@ function configureAutoStart(enabled) {
 function showWindow() { if (!win || win.isDestroyed()) return; win.show(); win.focus(); }
 function makeWindow() {
   win = new BrowserWindow({
-    width: 1400, height: 880, minWidth: 1000, minHeight: 670,
+    width: 1400, height: 880, minWidth: 700, minHeight: 540,
+    frame: false, thickFrame: true,
     backgroundColor: '#061e19', show: false, autoHideMenuBar: true,
     icon: path.join(__dirname,'assets','icon.png'),
     webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation: true,
       nodeIntegration: false, sandbox: false, webSecurity: true }
   });
   win.loadFile(path.join(__dirname,'index.html'));
-  win.once('ready-to-show', () => win.show());
+  win.once('ready-to-show', () => { win.show(); win.webContents.send('window:state', { maximized: win.isMaximized() }); });
+  win.on('maximize', () => win?.webContents.send('window:state', { maximized: true }));
+  win.on('unmaximize', () => win?.webContents.send('window:state', { maximized: false }));
   win.on('close', event => { if (!quitting) {event.preventDefault(); win.hide();} });
   win.on('closed', () => { win = null; });
   win.webContents.setWindowOpenHandler(() => ({ action:'deny' }));
@@ -133,6 +136,15 @@ app.whenReady().then(async () => {
   // Electron Builder configures the provider in app-update.yml for installed builds.
   const { autoUpdater } = require('electron-updater');
   createUpdateController({ app, ipcMain, webContents: () => win?.webContents, autoUpdater });
+  ipcMain.handle('window:minimize', () => { win?.minimize(); return true; });
+  ipcMain.handle('window:toggle-maximize', () => {
+    if (!win || win.isDestroyed()) return false;
+    if (win.isMaximized()) win.unmaximize(); else win.maximize();
+    return win.isMaximized();
+  });
+  // Match existing close-to-tray behavior; exit completely from the tray menu.
+  ipcMain.handle('window:close', () => { if (win && !win.isDestroyed()) win.close(); return true; });
+  ipcMain.handle('window:is-maximized', () => win?.isMaximized() ?? false);
   ipcMain.handle('state:load', () => load());
   ipcMain.handle('state:save', (_e, data) => persist(data));
   ipcMain.handle('photos:add', async () => {

@@ -50,8 +50,17 @@ let compareA='',compareB='';
 let saveTimer=null,toastTimer=null;
 let appReady=false;
 let dataLocation='';
-let updateStatus={ phase:'unsupported', currentVersion:'1.1.0', message:'Обновления доступны после установки FOCUS на Windows.', percent:0 }; 
+let updateStatus={ phase:'unsupported', currentVersion:'1.1.1', message:'Обновления доступны после установки FOCUS на Windows.', percent:0 }; 
 const isDesktop=Boolean(window.focusDesktop);
+document.documentElement.classList.toggle('desktop-window', isDesktop);
+function syncWindowState(maximized) {
+  document.documentElement.classList.toggle('window-maximized', Boolean(maximized));
+  const control=document.querySelector('[data-action="window-maximize"]');
+  if(control){
+    control.title=maximized?'Восстановить':'Развернуть';
+    control.setAttribute('aria-label',control.title);
+  }
+}
 const browserAPI={
   async load(){try{const j=localStorage.getItem('focus-local-preview-v1');return j?JSON.parse(j):defaultState();}catch{return defaultState()}},
   async save(s){localStorage.setItem('focus-local-preview-v1',JSON.stringify(s));return s},
@@ -221,6 +230,9 @@ async function addPhoto(date,type){try{
  await api.save(state);render();toast('Фотография добавлена в твой архив.');
 }catch(e){toast(`Не удалось добавить фото: ${e.message}`)}}
 async function handleAction(btn){const action=btn.dataset.action;
+ if(action==='window-minimize'){await window.focusDesktop?.minimizeWindow();return}
+ if(action==='window-maximize'){if(isDesktop)syncWindowState(await api.toggleMaximizeWindow());return}
+ if(action==='window-close'){await window.focusDesktop?.closeWindow();return}
  if(action==='navigate'){view=btn.dataset.view||'home';render();window.scrollTo({top:0});return}
  if(action==='toggle'){const d=getDaily(),k=btn.dataset.key;d[k]=d[k]!==true;scheduleSave();render();return}
  if(action==='setting-toggle'){const k=btn.dataset.key;state.settings[k]=!state.settings[k];scheduleSave();render();toast(k==='autoLaunch'&&!isDesktop?'Автозапуск работает в версии Windows.':'Настройка сохранена.');return}
@@ -279,6 +291,8 @@ document.addEventListener('submit',async e=>{
   updateStatus=await api.updateStatus();
   appReady=true;render();
   if(window.focusDesktop){
+   api.onWindowState(({maximized})=>syncWindowState(maximized));
+   syncWindowState(await api.isWindowMaximized());
    api.onChime(playChime);api.onImport(next=>{state=next;render()});
    api.onUpdateStatus(next=>{updateStatus=next;if(view==='settings')render()});
   }
