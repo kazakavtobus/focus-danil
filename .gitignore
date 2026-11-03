@@ -1,0 +1,20 @@
+# Dependencies and build artifacts
+node_modules/
+release/
+dist/
+out/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Your real health/photo records must never be published
+focus-state.json
+focus-state.json.tmp
+photos/
+backups/
+*.focus-backup.json
+
+# IDE / local metadata
+.vscode/
+.idea/

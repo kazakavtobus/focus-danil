@@ -1,0 +1,72 @@
+{
+  "name": "focus-danil",
+  "version": "1.1.0",
+  "private": true,
+  "productName": "FOCUS — Stay Focused",
+  "description": "Приватный офлайн-трекер привычек, веса и фото для Windows 11. Обновления через GitHub Releases.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check main.js && node --check preload.js && node --check app.js && node --check updater.js && node --check scripts/configure-github.mjs",
+    "build:win": "electron-builder --win nsis --x64 --publish never",
+    "build:portable": "electron-builder --win portable --x64 --publish never",
+    "github:configure": "node scripts/configure-github.mjs"
+  },
+  "devDependencies": {
+    "electron": "^36.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.tvoykazak.focus",
+    "productName": "FOCUS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "updater.js",
+      "preload.js",
+      "index.html",
+      "styles.css",
+      "app.js",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "perMachine": false
+    },
+    "asar": true,
+    "artifactName": "FOCUS-Setup-${version}-${arch}.${ext}",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "kazakavtobus",
+        "repo": "focus-danil"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kazakavtobus/focus-danil.git"
+  }
+}
